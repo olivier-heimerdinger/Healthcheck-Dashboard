@@ -26,6 +26,7 @@ main_loop = None
 retention_days = 7
 
 n8n_webhook_url = ""
+n8n_auth_token = ""
 alert_threshold_seconds = 30
 server_state = {} # Dictionnaire pour tracker le temps de chute et l'anti-spam
 
@@ -55,6 +56,7 @@ def load_config():
 
             # --- NOUVEAU : Lecture des infos n8n ---
             n8n_webhook_url = config.get("n8n_webhook_url", "")
+            n8n_auth_token = config.get("n8n_auth_token", "")
             alert_threshold_seconds = config.get("alert_threshold_seconds", 30)
             
             # Initialiser le tracking d'état pour chaque serveur
@@ -94,7 +96,7 @@ async def db_maintenance_loop():
 
 # --- Logique d'Alerte n8n ---
 async def send_n8n_alert(session, server_name, duration_seconds, alert_type="CRITICAL_DOWN"):
-    """Envoie un payload JSON au webhook n8n de manière asynchrone."""
+    """Envoie un payload JSON au webhook n8n de manière asynchrone sécurisée."""
     if not n8n_webhook_url: return
     
     payload = {
@@ -104,10 +106,18 @@ async def send_n8n_alert(session, server_name, duration_seconds, alert_type="CRI
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
     
+    headers = {"Content-Type": "application/json"}
+    if n8n_auth_token:
+        # On utilise le standard "Bearer token"
+        headers["Authorization"] = f"Bearer {n8n_auth_token}"
+    
     try:
-        async with session.post(n8n_webhook_url, json=payload, timeout=5) as response:
+        # On ajoute l'argument headers=headers ici :
+        async with session.post(n8n_webhook_url, json=payload, headers=headers, timeout=5) as response:
             if response.status in [200, 201]:
                 print(f"🚀 [n8n] Alerte [{alert_type}] envoyée pour {server_name}")
+            elif response.status in [401, 403]:
+                print(f"🔒 [n8n] Accès refusé ! Vérifiez votre n8n_auth_token.")
             else:
                 print(f"⚠️ [n8n] Échec de l'envoi (Statut {response.status})")
     except Exception as e:

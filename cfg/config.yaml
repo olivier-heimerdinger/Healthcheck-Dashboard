@@ -2,7 +2,8 @@
 settings:
   check_interval: 5 # Vérification toutes les 5 secondes
   retention_days: 7
-  n8n_webhook_url: "https://votre-n8n.com/webhook/server-down" # <-- VOTRE URL N8N ICI
+  n8n_webhook_url: "https://votre-n8n.com/webhook/server-down"
+  n8n_auth_token: "MonSuperSecret-XyZ-123456!"
   alert_threshold_seconds: 60 # <-- Alerte si HS pendant plus de 60 secondes
 
 servers:
