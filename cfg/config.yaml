@@ -1,0 +1,14 @@
+# config.yaml
+settings:
+  check_interval: 5 # Vérification toutes les 5 secondes
+  retention_days: 7
+  n8n_webhook_url: "https://votre-n8n.com/webhook/server-down" # <-- VOTRE URL N8N ICI
+  alert_threshold_seconds: 60 # <-- Alerte si HS pendant plus de 60 secondes
+
+servers:
+  - name: "Serveur xyz"
+    url: "https://xyz.dev"
+  - name: "MAIL SERVEUR"
+    url: "https://mail.xyz.dev"
+  - name: "Serveur 9"
+    url: "https://server9.xyz.dev"
